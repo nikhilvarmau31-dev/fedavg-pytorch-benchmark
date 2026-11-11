@@ -38,6 +38,30 @@ The core issue is client drift: when each client only sees 2 digit classes, loca
 - If you hit an SSL error on MNIST download, run `pip install --upgrade certifi` or add `import ssl; ssl._create_unverified_context = ssl.create_default_context` at the top
 - Partial participation (50% per round) is baked in — change `num_clients // 2` in `run_experiment()` to adjust
 
+## Ablation: local epochs (E=1 vs E=2 vs E=5)
+
+I ran a follow-up experiment sweeping local epochs to test the classic claim that more local steps = more client drift on Non-IID data.
+
+![ablation drift](fedavg_ablation.png)
+
+![iid vs non-iid gap](fedavg_ablation_gap.png)
+
+Final accuracy after 15 rounds:
+
+| | IID | Non-IID |
+|---|---|---|
+| E=1 | 98.94% | 94.88% |
+| E=2 | 99.12% | 96.24% |
+| E=5 | 99.15% | 96.29% |
+
+On MNIST the IID–NonIID gap stays around 3–4% regardless of E, and more local epochs actually help slightly even in the Non-IID case. The dramatic drift effect from theory is more visible on harder datasets (CIFAR, Shakespeare, etc.) where label distributions are more extreme. The bigger story here is the variance — Non-IID curves oscillate round-to-round while IID ones are almost flat after round 5.
+
+Run the ablation yourself:
+
+```bash
+python fedavg_ablation.py
+```
+
 ## References
 
 - McMahan et al., [Communication-Efficient Learning of Deep Networks from Decentralized Data](https://arxiv.org/abs/1602.05629), AISTATS 2017
